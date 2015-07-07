@@ -1,0 +1,10 @@
+/bin/
+.settings/
+target/
+*.cache
+*.cache-main
+*.cache-tests
+*.DS_Store
+.project
+.classpath
+console.devmode.log
