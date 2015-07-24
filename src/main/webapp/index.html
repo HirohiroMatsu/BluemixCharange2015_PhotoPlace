@@ -41,6 +41,7 @@
           $(".before").hide();
           $(".next").hide();
           $("#recoarea").hide();
+          $("#loading").hide();
           var latlng = new google.maps.LatLng(35,135);
           var opts = {
             zoom: 7,
@@ -63,6 +64,8 @@
           });
 
           $("#ff").submit(function() {
+            $("#loading").show();
+            $("#recoarea").hide();
             var fd = new FormData($('#ff').get(0));
             /* Act on the event */
             $.ajax({
@@ -75,6 +78,7 @@
             }).done(function( data )
              {
               console.log(data);
+              $("#loading").hide();
               $("#recoarea").show();
               recoImages = data.recomends;
               page = 1;
@@ -134,11 +138,15 @@
         <hr>
 
         <div class="container main-content">
-          <span id="recoarea"><h3>おすすめの写真(写真をクリックすると地理情報が表示されます)</h3></span>
-          <button type="button" class="btn btn-primary before">前の20件</button>
-          <button type="button" class="btn btn-primary next">次の20件</button>
-        <br>
-          <div class="row" id="recomends"></div>
+          <div id="loading"><img src="img/loading.gif" style="width:250px; height:250px"></div>
+          <div id="recoarea">
+            <h3>おすすめの写真(写真をクリックすると地理情報が表示されます)</h3>
+            <button type="button" class="btn btn-primary before">前の20件</button>
+            <button type="button" class="btn btn-primary next">次の20件</button>
+            <br>
+            <br>
+            <div class="row" id="recomends"></div>
+          </div>
           <hr>
           <h3>選択した写真</h3>
           <div class="row">
