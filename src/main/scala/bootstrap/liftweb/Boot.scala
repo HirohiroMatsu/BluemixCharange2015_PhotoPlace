@@ -3,20 +3,20 @@ package bootstrap.liftweb
 import net.liftweb._
 import util._
 import Helpers._
-
 import common._
 import http._
 import sitemap._
 import Loc._
 import mapper._
-
 import code.model._
 import net.liftmodules.FoBo
-
 import scala.language.postfixOps
 import net.liftweb.mongodb.MongoDB
 import com.mongodb.MongoClient
 import net.liftweb.util.DefaultConnectionIdentifier
+import code.lib.HttpDispatcher
+import code.lib.HttpDispatcherClassic
+import code.rest.PhotoPlaceRest
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -24,7 +24,13 @@ import net.liftweb.util.DefaultConnectionIdentifier
  */
 class Boot {
   def boot {
-    MongoDB.defineDb(DefaultConnectionIdentifier, new MongoClient(sys.env.getOrElse("MONGO_PORT_27017_TCP_ADDR", "localhost")), "CounterDB")
+    MongoDB.defineDb(DefaultConnectionIdentifier, new MongoClient(sys.env.getOrElse("MONGO_PORT_27017_TCP_ADDR", "localhost")), "PhotoPlaceDB")
+    if (LabelGroupe.findAll.isEmpty) {
+      HttpDispatcherClassic.getLabels()
+    }
+    
+    LiftRules.dispatch.append(PhotoPlaceRest)
+    
     if (!DB.jndiJdbcConnAvailable_?) {
       val vendor =
         new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",

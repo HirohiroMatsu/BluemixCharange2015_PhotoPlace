@@ -1,20 +1,170 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-    <title>Home</title>
-  </head>
-  <body data-lift-content-id="main">
-    <div id="main" data-lift="surround?with=default;at=content">
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+      <title>Home</title>
+    </head>
+    <body data-lift-content-id="main">
+      <div id="main" data-lift="surround?with=default;at=content">
+      <script type="text/javascript">
+        var map;
+        var marker;
+        var recoImages;
+        var page;
+        var setImage = function(){
+          $(".before").show();
+          $(".next").show();
+          if(page == 1){
+            $(".before").hide();
+          }
+          if(page == 10){
+            $(".next").hide();
+          }
+          var images = ""
+          $.each(recoImages.slice((page-1)*12,page*12),function(i, recomend) {
+            images += '\<div class="col-xs-4 col-md-1"><img src="' + recomend.url  + '\" lat="'+ recomend.latitude + '\" long="'+ recomend.longitude + '\" class="img-responsive img-rounded ri" alt="Generic placeholder thumbnail"></div>'
+          });
+          $("#recomends").html(images)
+          $(".ri").click(function(){
+            var latlng = new google.maps.LatLng($(this).attr("lat"),$(this).attr("long"));
+            var mop = {
+              position:latlng,
+              visible: true
+            };
+            marker.setOptions(mop);
+            map.panTo(new google.maps.LatLng($(this).attr("lat"),$(this).attr("long")));
+            $("#ci").attr("src",$(this).attr("src"));
+          });
+        };
 
-      <h2>Welcome to your project!</h2>
-      <p>
-	<span data-lift="helloWorld.howdy">
-	  Welcome to your Lift app at <span id="time">Time goes here</span>
-	</span>
-      </p>
-      
-    </div>
-  </body>
-</html>
+        $(document).ready(function() {
+          $(".before").hide();
+          $(".next").hide();
+          $("#recoarea").hide();
+          var latlng = new google.maps.LatLng(35,135);
+          var opts = {
+            zoom: 7,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          };
+          map = new google.maps.Map(document.getElementById("map_canvas"), opts);
+          marker = new google.maps.Marker({
+            position: latlng,
+            map: map,
+            visible: false
+          });
+          $(".before").click(function() {
+            page = page - 1;
+            setImage();
+          });
+          $(".next").click(function() {
+            page = page + 1;
+            setImage();
+          });
+
+          $("#ff").submit(function() {
+            var fd = new FormData($('#ff').get(0));
+            /* Act on the event */
+            $.ajax({
+              url: "/api/byfile",
+              type: 'POST',
+              data: fd,
+              processData: false,
+              contentType: false,
+              dataType: 'json'
+            }).done(function( data )
+             {
+              console.log(data);
+              $("#recoarea").show();
+              recoImages = data.recomends;
+              page = 1;
+              setImage();
+            });
+            return false;
+          });
+        });
+      </script>
+      <div class="container main-content"  >
+
+        <hr>
+
+        <div class="container">
+          <div class="row">
+            <div class="col-md-10">
+              <h4>あなたのイメージの写真を探しましょう。</h4>
+            </div>
+          </div> <!--end of row -->
+          <div class="row">
+            <div class="col-md-6 content-area">
+              <div class="form-group">
+              <form id="ff">
+                <input type="file" id="file_input" name="file_input" style="display: none;">
+                <div style="width:60%;float:left;margin-right:10px;" class="input-group">
+                  <span class="input-group-btn">
+                      <button id="ub" class="btn btn-default" type="button" onclick="$('#file_input').click();">
+                          <i class="glyphicon glyphicon-folder-open"></i>
+                      </button>
+                  </span>
+                  <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+                </div>
+                <input type="submit" name="picture_up" class="btn btn-primary" value="Upload">
+                </form>
+              </div>
+            </div>
+
+<!--             <div class="col-md-4 content-area">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="検索キーワード" >
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">検索</button>
+                  </span>
+                </div>
+            </div> -->
+          </div> <!--end of row -->
+        </div>
+
+        <script type="text/javascript">
+          $(function(){
+          $('#file_input').change(function() {
+          $('#dummy_file').val($(this).val());
+          });
+          });
+        </script>
+
+        <hr>
+
+        <div class="container main-content">
+          <span id="recoarea"><h3>おすすめの写真(写真をクリックすると地理情報が表示されます)</h3></span>
+          <button type="button" class="btn btn-primary before">前の20件</button>
+          <button type="button" class="btn btn-primary next">次の20件</button>
+        <br>
+          <div class="row" id="recomends"></div>
+          <hr>
+          <h3>選択した写真</h3>
+          <div class="row">
+            <div class="col-md-4 content-area">
+              <!--サムネイル-->
+              <a data-toggle="lightbox" href="#lightbox" class="thumbnail">
+                  <img  id="ci"  src="img/image-3.jpg" alt="">
+              </a>
+              <!--拡大画像-->
+<!--               <div id="lightbox" class="lightbox hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class='lightbox-header'>
+                      <button type="button" class="close" data-dismiss="lightbox" aria-hidden="true">&times;</button>
+                  </div>
+                  <div class='lightbox-content'>
+                      <img src="" style="max-width:100%">
+                  </div>
+              </div> -->
+            </div>
+            <div class="col-md-8 content-area">
+                  <div class="map_wrapper">
+                      <div id="map_canvas" class="googlemap" style="width:750px; height:200px"></div>
+                  </div><!--end of .map_wrapper-->
+            </div><!--end of .content-area-->
+          </div><!--.row-->    
+        </div><!--/.main-content-->
+      </div>
+    </body>
+  </html>
 
